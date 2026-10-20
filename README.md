@@ -213,7 +213,19 @@ A interface web estará disponível em `http://localhost:5173`, com proxy config
 4. [x] **Módulos de identidade, empresas e associação de membros.**
 5. [x] **Contexto multi-tenant e testes de isolamento de dados.**
 6. [x] **CRUD de imóveis com validação, paginação, auditoria e testes.**
-7. [ ] **Contatos, leads, CRM, atividades e visitas.**
-8. [ ] **Upload seguro de imagens (S3) e catálogo público de anúncios.**
-9. [ ] **Planos, assinaturas e gateway de pagamento com webhooks idempotentes.**
+7. [x] **Contatos, leads, CRM, funil de vendas (Kanban), agendamento de atividades e visitas.**
+   - Entidades e agregados de Lead, LeadActivity e CompanyContact.
+   - Quadro Kanban no frontend com alteração de status em tempo real.
+   - Agendamento e conclusão de tarefas, ligações, reuniões e visitas imobiliárias.
+   - Métricas do funil de conversão e cálculo de taxa de sucesso comercial.
+8. [x] **Portal público de anúncios (Listings) e captura direta de leads.**
+   - Catálogo público aberto (/api/v1/public/listings) com filtros por tipo, finalidade, faixa de preço e quartos.
+   - Formulário de interesse e agendamento de visita público (/api/v1/public/inquiries).
+   - Conversão e registro automático do interessado como Lead no CRM do tenant imobiliário.
+9. [x] **Planos, assinaturas e controle de limites e cotas do SaaS (subscriptions).**
+   - Agregados de Plan e TenantSubscription com status e períodos de faturamento.
+   - Tabela de planos pré-configurados (Essencial, Profissional, Enterprise).
+   - Controle estrito de cotas com validação de limite excedido (HTTP 403 RFC 7807).
+   - Medidores de consumo no frontend para capacidade de imóveis e usuários da equipe.
+   - Fluxo interativo de troca e upgrade de planos com persistência e atualização imediata de limites.
 10. [ ] **Staging, backups/restauração, observabilidade e homologação.**

@@ -15,7 +15,11 @@ public interface PropertyRepository {
 
   List<Property> findByTenantId(UUID tenantId, int page, int size);
 
+  List<Property> findByTenantIdAndStatus(UUID tenantId, PropertyStatus status, int page, int size);
+
   long countByTenantId(UUID tenantId);
+
+  long countByTenantIdAndStatus(UUID tenantId, PropertyStatus status);
 
   void delete(Property property);
 }

@@ -2,6 +2,7 @@ package br.com.imovix.properties.infrastructure.persistence;
 
 import br.com.imovix.properties.domain.Property;
 import br.com.imovix.properties.domain.PropertyRepository;
+import br.com.imovix.properties.domain.PropertyStatus;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,8 +47,23 @@ public class JpaPropertyRepositoryAdapter implements PropertyRepository {
   }
 
   @Override
+  public List<Property> findByTenantIdAndStatus(
+      UUID tenantId, PropertyStatus status, int page, int size) {
+    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    return repository
+        .findByTenantIdAndStatus(tenantId, status, pageRequest)
+        .map(PropertyJpaEntity::toDomain)
+        .getContent();
+  }
+
+  @Override
   public long countByTenantId(UUID tenantId) {
     return repository.countByTenantId(tenantId);
+  }
+
+  @Override
+  public long countByTenantIdAndStatus(UUID tenantId, PropertyStatus status) {
+    return repository.countByTenantIdAndStatus(tenantId, status);
   }
 
   @Override

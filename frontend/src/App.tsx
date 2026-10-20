@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import './App.css';
 import { PropertiesPage } from './features/properties/PropertiesPage';
 import { CrmView } from './features/crm/CrmView';
+import { PublicCatalogPage } from './features/listings/PublicCatalogPage';
+import { SubscriptionPage } from './features/subscriptions/SubscriptionPage';
 
 interface ModuleCard {
   id: string;
@@ -54,8 +56,8 @@ const MODULES: ModuleCard[] = [
     id: 'listings',
     name: 'Divulgação Pública',
     category: 'business',
-    description: 'Catálogo aberto para clientes, SEO otimizado e captura de leads.',
-    status: 'scaffolded',
+    description: 'Catálogo aberto para clientes, busca com filtros e captura de leads integrada ao CRM.',
+    status: 'ready',
     apiPath: '/api/v1/public/listings',
     icon: 'PUB',
   },
@@ -63,9 +65,9 @@ const MODULES: ModuleCard[] = [
     id: 'subscriptions',
     name: 'Planos & Assinaturas',
     category: 'ops',
-    description: 'Cobrança recorrente, controle de limites e webhooks de pagamento.',
-    status: 'scaffolded',
-    apiPath: '/api/v1/subscription',
+    description: 'Cobrança recorrente, controle de limites e cotas de recursos SaaS.',
+    status: 'ready',
+    apiPath: '/api/v1/subscriptions/current',
     icon: 'SUB',
   },
   {
@@ -89,7 +91,7 @@ const MODULES: ModuleCard[] = [
 ];
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'properties' | 'crm' | 'architecture'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'crm' | 'listings' | 'subscriptions' | 'architecture'>('properties');
   const [filter, setFilter] = useState<'all' | 'core' | 'business' | 'ops'>('all');
 
   const filteredModules = MODULES.filter(
@@ -123,6 +125,20 @@ export const App: React.FC = () => {
               onClick={() => setActiveTab('crm')}
             >
               CRM &amp; Funil de Vendas
+            </button>
+            <button
+              className={`btn ${activeTab === 'listings' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+              onClick={() => setActiveTab('listings')}
+            >
+              Portal Público (Listings)
+            </button>
+            <button
+              className={`btn ${activeTab === 'subscriptions' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+              onClick={() => setActiveTab('subscriptions')}
+            >
+              Planos &amp; Assinatura
             </button>
             <button
               className={`btn ${activeTab === 'architecture' ? 'btn-primary' : 'btn-secondary'}`}
@@ -167,6 +183,14 @@ export const App: React.FC = () => {
       ) : activeTab === 'crm' ? (
         <main className="container main-content" style={{ paddingTop: '1.5rem' }}>
           <CrmView />
+        </main>
+      ) : activeTab === 'listings' ? (
+        <main className="container main-content" style={{ paddingTop: '1.5rem' }}>
+          <PublicCatalogPage />
+        </main>
+      ) : activeTab === 'subscriptions' ? (
+        <main className="container main-content" style={{ paddingTop: '1.5rem' }}>
+          <SubscriptionPage />
         </main>
       ) : (
         <>

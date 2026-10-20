@@ -46,8 +46,25 @@ public class TenantFilter extends OncePerRequestFilter {
       return;
     }
 
-    UUID userId = extractUserId(request);
     UUID requestedTenantId = extractRequestedTenantId(request);
+
+    // Tratamento para rotas de divulgacao publica
+    if (path.startsWith("/api/v1/public")) {
+      try {
+        if (requestedTenantId != null) {
+          TenantId tenantId = new TenantId(requestedTenantId);
+          TenantContext.set(tenantId);
+          MDC.put(MDC_TENANT_KEY, tenantId.toString());
+        }
+        filterChain.doFilter(request, response);
+      } finally {
+        TenantContext.clear();
+        MDC.remove(MDC_TENANT_KEY);
+      }
+      return;
+    }
+
+    UUID userId = extractUserId(request);
 
     try {
       if (userId != null) {
@@ -57,11 +74,8 @@ public class TenantFilter extends OncePerRequestFilter {
           MDC.put(MDC_TENANT_KEY, tenantId.toString());
           response.setHeader(TENANT_HEADER, tenantId.toString());
         } catch (Exception ex) {
-          // Se houver falha ao resolver e a rota não for opcional, loga em debug e propaga para o
-          // handler
           log.debug(
               "Não foi possível resolver o tenant para o usuário {}: {}", userId, ex.getMessage());
-          // Se o usuário passou um tenant inválido explicitamente, lança para retornar 403
           if (requestedTenantId != null) {
             throw ex;
           }
@@ -76,7 +90,9 @@ public class TenantFilter extends OncePerRequestFilter {
   }
 
   private boolean isBypassPath(String path) {
-    return path.startsWith("/actuator") || path.equals("/api/v1/users");
+    return path.startsWith("/actuator")
+        || path.equals("/api/v1/users")
+        || path.equals("/api/v1/plans");
   }
 
   private UUID extractUserId(HttpServletRequest request) {
@@ -105,6 +121,9 @@ public class TenantFilter extends OncePerRequestFilter {
     String tenantHeader = request.getHeader(TENANT_HEADER);
     if (tenantHeader == null || tenantHeader.isBlank()) {
       tenantHeader = request.getHeader(COMPANY_HEADER);
+    }
+    if (tenantHeader == null || tenantHeader.isBlank()) {
+      tenantHeader = request.getParameter("tenantId");
     }
 
     if (tenantHeader != null && !tenantHeader.isBlank()) {

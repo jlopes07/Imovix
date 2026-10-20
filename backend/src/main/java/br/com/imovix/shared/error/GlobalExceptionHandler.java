@@ -100,7 +100,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     br.com.imovix.companies.domain.MembershipNotFoundException.class,
     br.com.imovix.properties.domain.PropertyNotFoundException.class,
     br.com.imovix.crm.domain.LeadNotFoundException.class,
-    br.com.imovix.crm.domain.ActivityNotFoundException.class
+    br.com.imovix.crm.domain.ActivityNotFoundException.class,
+    br.com.imovix.subscriptions.domain.SubscriptionNotFoundException.class
   })
   public ResponseEntity<ProblemDetail> handleNotFoundExceptions(RuntimeException ex) {
     ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
@@ -109,6 +110,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     enrichProblemDetail(problem);
 
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+  }
+
+  @ExceptionHandler(br.com.imovix.subscriptions.domain.PlanLimitExceededException.class)
+  public ResponseEntity<ProblemDetail> handlePlanLimitExceeded(
+      br.com.imovix.subscriptions.domain.PlanLimitExceededException ex) {
+    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+    problem.setType(URI.create("https://api.imovix.com.br/errors/plan-limit-exceeded"));
+    problem.setTitle("Limite do Plano Atingido");
+    enrichProblemDetail(problem);
+
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
   }
 
   @ExceptionHandler({

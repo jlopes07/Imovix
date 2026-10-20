@@ -70,6 +70,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/users")
                     .permitAll()
+                    .requestMatchers("/api/v1/public/**", "/api/v1/plans")
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .build();

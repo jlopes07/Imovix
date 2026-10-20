@@ -1,5 +1,6 @@
 package br.com.imovix.properties.infrastructure.persistence;
 
+import br.com.imovix.properties.domain.PropertyStatus;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -17,5 +18,10 @@ public interface SpringDataPropertyRepository extends JpaRepository<PropertyJpaE
 
   Page<PropertyJpaEntity> findByTenantId(UUID tenantId, Pageable pageable);
 
+  Page<PropertyJpaEntity> findByTenantIdAndStatus(
+      UUID tenantId, PropertyStatus status, Pageable pageable);
+
   long countByTenantId(UUID tenantId);
+
+  long countByTenantIdAndStatus(UUID tenantId, PropertyStatus status);
 }
