@@ -83,11 +83,11 @@ export interface PropertyFormData {
 }
 
 export const PROPERTY_TYPE_LABELS: Record<PropertyType, { label: string; icon: string }> = {
-  APARTMENT: { label: 'Apartamento', icon: '🏢' },
-  HOUSE: { label: 'Casa', icon: '🏡' },
-  LAND: { label: 'Terreno', icon: '📐' },
-  COMMERCIAL: { label: 'Comercial', icon: '🏬' },
-  RURAL: { label: 'Rural / Fazenda', icon: '🌾' },
+  APARTMENT: { label: 'Apartamento', icon: 'AP' },
+  HOUSE: { label: 'Casa', icon: 'CS' },
+  LAND: { label: 'Terreno', icon: 'TR' },
+  COMMERCIAL: { label: 'Comercial', icon: 'CM' },
+  RURAL: { label: 'Rural / Fazenda', icon: 'RU' },
 };
 
 export const PROPERTY_PURPOSE_LABELS: Record<PropertyPurpose, { label: string; badgeClass: string }> = {

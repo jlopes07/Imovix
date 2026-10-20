@@ -194,7 +194,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
             {initialData ? `Editar Imóvel (${initialData.code})` : 'Novo Cadastro de Imóvel'}
           </h2>
           <button className="modal-close-btn" onClick={onClose} aria-label="Fechar modal">
-            ✕
+            X
           </button>
         </div>
 
@@ -211,7 +211,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                   fontSize: '0.875rem',
                 }}
               >
-                ⚠️ {errorMessage}
+                Erro: {errorMessage}
               </div>
             )}
 
@@ -233,7 +233,6 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '1.1rem' }}>🏷️</span>
                 <span>
                   <strong>Código do Imóvel:</strong>{' '}
                   {initialData ? (
@@ -263,7 +262,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                 >
                   {(Object.keys(PROPERTY_TYPE_LABELS) as PropertyType[]).map((t) => (
                     <option key={t} value={t}>
-                      {PROPERTY_TYPE_LABELS[t].icon} {PROPERTY_TYPE_LABELS[t].label}
+                      [{PROPERTY_TYPE_LABELS[t].icon}] {PROPERTY_TYPE_LABELS[t].label}
                     </option>
                   ))}
                 </select>
@@ -502,10 +501,11 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                         right: '0.75rem',
                         top: '50%',
                         transform: 'translateY(-50%)',
-                        fontSize: '0.8rem',
+                        fontSize: '0.75rem',
+                        color: '#38bdf8',
                       }}
                     >
-                      ⏳
+                      Buscando...
                     </span>
                   )}
                 </div>

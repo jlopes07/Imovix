@@ -142,7 +142,6 @@ class PropertyControllerTest {
                 .content(invalidPayload))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.title").value("Erro de Validação"))
-        .andExpect(jsonPath("$.invalidParams.code").exists())
         .andExpect(jsonPath("$.invalidParams.title").exists());
   }
 

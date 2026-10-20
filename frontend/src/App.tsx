@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import { PropertiesPage } from './features/properties/PropertiesPage';
+import { CrmView } from './features/crm/CrmView';
 
 interface ModuleCard {
   id: string;
@@ -20,7 +21,7 @@ const MODULES: ModuleCard[] = [
     description: 'Gestão de usuários, convites para corretores e autenticação segura.',
     status: 'ready',
     apiPath: '/api/v1/users',
-    icon: '👤',
+    icon: 'ID',
   },
   {
     id: 'tenancy',
@@ -29,7 +30,7 @@ const MODULES: ModuleCard[] = [
     description: 'Isolamento de dados por imobiliária em nível de aplicação e banco.',
     status: 'ready',
     apiPath: '/api/v1/companies/current',
-    icon: '🏢',
+    icon: 'TEN',
   },
   {
     id: 'properties',
@@ -38,16 +39,16 @@ const MODULES: ModuleCard[] = [
     description: 'Cadastro detalhado, precificação, características e galeria de fotos.',
     status: 'ready',
     apiPath: '/api/v1/properties',
-    icon: '🏠',
+    icon: 'IMO',
   },
   {
     id: 'crm',
     name: 'CRM & Funil Imobiliário',
     category: 'business',
-    description: 'Interessados, visitas, tarefas e acompanhamento de negociações.',
-    status: 'scaffolded',
+    description: 'Contatos, leads, funil comercial, atividades e visitas.',
+    status: 'ready',
     apiPath: '/api/v1/leads',
-    icon: '📈',
+    icon: 'CRM',
   },
   {
     id: 'listings',
@@ -56,7 +57,7 @@ const MODULES: ModuleCard[] = [
     description: 'Catálogo aberto para clientes, SEO otimizado e captura de leads.',
     status: 'scaffolded',
     apiPath: '/api/v1/public/listings',
-    icon: '🌐',
+    icon: 'PUB',
   },
   {
     id: 'subscriptions',
@@ -65,7 +66,7 @@ const MODULES: ModuleCard[] = [
     description: 'Cobrança recorrente, controle de limites e webhooks de pagamento.',
     status: 'scaffolded',
     apiPath: '/api/v1/subscription',
-    icon: '💳',
+    icon: 'SUB',
   },
   {
     id: 'audit',
@@ -74,7 +75,7 @@ const MODULES: ModuleCard[] = [
     description: 'Log imutável de eventos sensíveis para conformidade e segurança.',
     status: 'scaffolded',
     apiPath: '/api/v1/audit/events',
-    icon: '🛡️',
+    icon: 'AUD',
   },
   {
     id: 'platformadmin',
@@ -83,12 +84,12 @@ const MODULES: ModuleCard[] = [
     description: 'Painel do operador do SaaS para suporte e métricas globais.',
     status: 'scaffolded',
     apiPath: '/api/v1/platform/tenants',
-    icon: '⚙️',
+    icon: 'ADM',
   },
 ];
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'properties' | 'architecture'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'crm' | 'architecture'>('properties');
   const [filter, setFilter] = useState<'all' | 'core' | 'business' | 'ops'>('all');
 
   const filteredModules = MODULES.filter(
@@ -114,14 +115,21 @@ export const App: React.FC = () => {
               style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
               onClick={() => setActiveTab('properties')}
             >
-              🏠 Gestão de Imóveis (CRUD)
+              Gestão de Imóveis (CRUD)
+            </button>
+            <button
+              className={`btn ${activeTab === 'crm' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+              onClick={() => setActiveTab('crm')}
+            >
+              CRM &amp; Funil de Vendas
             </button>
             <button
               className={`btn ${activeTab === 'architecture' ? 'btn-primary' : 'btn-secondary'}`}
               style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
               onClick={() => setActiveTab('architecture')}
             >
-              🏗️ Módulos da Arquitetura
+              Módulos da Arquitetura
             </button>
           </nav>
 
@@ -156,6 +164,10 @@ export const App: React.FC = () => {
           </div>
           <PropertiesPage />
         </main>
+      ) : activeTab === 'crm' ? (
+        <main className="container main-content" style={{ paddingTop: '1.5rem' }}>
+          <CrmView />
+        </main>
       ) : (
         <>
           {/* Hero Section */}
@@ -174,12 +186,12 @@ export const App: React.FC = () => {
               </p>
 
               <div className="tech-stack-row">
-                <div className="tech-pill">☕ Java 25 (LTS)</div>
-                <div className="tech-pill">🌱 Spring Boot 4.1.1</div>
-                <div className="tech-pill">🐘 PostgreSQL 18</div>
-                <div className="tech-pill">🐳 Docker Compose</div>
-                <div className="tech-pill">⚛️ React 19 + TypeScript</div>
-                <div className="tech-pill">⚡ Vite</div>
+                <div className="tech-pill">Java 25 (LTS)</div>
+                <div className="tech-pill">Spring Boot 4.1.1</div>
+                <div className="tech-pill">PostgreSQL 18</div>
+                <div className="tech-pill">Docker Compose</div>
+                <div className="tech-pill">React 19 + TypeScript</div>
+                <div className="tech-pill">Vite</div>
               </div>
             </div>
           </section>
@@ -226,7 +238,9 @@ export const App: React.FC = () => {
               {filteredModules.map((m) => (
                 <div key={m.id} className="glass-card module-card">
                   <div className="module-top">
-                    <span className="module-icon">{m.icon}</span>
+                    <span className="module-icon" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38bdf8' }}>
+                      [{m.icon}]
+                    </span>
                     <span className={`badge ${m.status === 'ready' ? 'badge-emerald' : m.status === 'scaffolded' ? 'badge-blue' : 'badge-amber'}`}>
                       {m.status === 'ready' ? 'Ativo' : m.status === 'scaffolded' ? 'Estruturado' : 'Planejado'}
                     </span>
@@ -242,7 +256,9 @@ export const App: React.FC = () => {
 
             {/* Security & Isolation Summary Banner */}
             <div className="glass-card security-banner">
-              <div className="security-icon">🔒</div>
+              <div className="security-icon" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>
+                SEC
+              </div>
               <div className="security-content">
                 <h3 className="security-title">Segurança & Multi-tenancy por Desenho</h3>
                 <p className="security-text">

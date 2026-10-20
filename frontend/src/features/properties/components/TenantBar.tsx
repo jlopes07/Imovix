@@ -39,7 +39,7 @@ export const TenantBar: React.FC<TenantBarProps> = ({ user, company, onRefreshSe
           onClick={onRefreshSession}
           title="Alternar ou redefinir a empresa e usuário ativos"
         >
-          🔄 Alternar Empresa / Sessão
+          Alternar Empresa / Sessão
         </button>
       </div>
     </aside>

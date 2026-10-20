@@ -20,7 +20,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const typeInfo = PROPERTY_TYPE_LABELS[property.type] || { label: property.type, icon: '🏠' };
+  const typeInfo = PROPERTY_TYPE_LABELS[property.type] || { label: property.type, icon: 'IMO' };
   const purposeInfo = PROPERTY_PURPOSE_LABELS[property.purpose] || { label: property.purpose, badgeClass: '' };
   const statusInfo = PROPERTY_STATUS_LABELS[property.status] || { label: property.status, badgeClass: '' };
 
@@ -54,7 +54,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       {/* Body */}
       <div className="property-card-body">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#38bdf8' }}>
-          <span>{typeInfo.icon}</span>
+          <span>[{typeInfo.icon}]</span>
           <span>{typeInfo.label}</span>
         </div>
 
@@ -63,7 +63,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </h3>
 
         <div className="property-card-address" title={addressSummary}>
-          <span>📍</span>
           <span>{addressSummary}</span>
         </div>
 
@@ -98,23 +97,18 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Features Row */}
         <div className="property-features-row">
           <div className="feature-item" title="Quartos">
-            <span>🛏️</span>
-            <span>{property.dimensions?.bedrooms ?? 0}</span>
+            <span>Quartos: {property.dimensions?.bedrooms ?? 0}</span>
           </div>
           <div className="feature-item" title="Suítes">
-            <span>✨</span>
-            <span>{property.dimensions?.suites ?? 0}</span>
+            <span>Suítes: {property.dimensions?.suites ?? 0}</span>
           </div>
           <div className="feature-item" title="Banheiros">
-            <span>🚿</span>
-            <span>{property.dimensions?.bathrooms ?? 0}</span>
+            <span>Banheiros: {property.dimensions?.bathrooms ?? 0}</span>
           </div>
           <div className="feature-item" title="Vagas de Garagem">
-            <span>🚗</span>
-            <span>{property.dimensions?.parkingSpaces ?? 0}</span>
+            <span>Vagas: {property.dimensions?.parkingSpaces ?? 0}</span>
           </div>
           <div className="feature-item" style={{ marginLeft: 'auto' }} title="Área Útil">
-            <span>📐</span>
             <span>{formatArea(property.dimensions?.usableArea || property.dimensions?.totalArea)}</span>
           </div>
         </div>
@@ -136,7 +130,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               onClick={() => onEdit(property)}
               title="Editar imóvel"
             >
-              ✏️
+              Editar
             </button>
             <button
               className="btn btn-secondary"
@@ -144,7 +138,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               onClick={() => onDelete(property)}
               title="Excluir imóvel"
             >
-              🗑️
+              Excluir
             </button>
           </div>
         </div>

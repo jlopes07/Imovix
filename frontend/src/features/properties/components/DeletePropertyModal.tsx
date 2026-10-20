@@ -38,11 +38,11 @@ export const DeletePropertyModal: React.FC<DeletePropertyModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h2 className="modal-title" style={{ color: '#f43f5e', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span>⚠️</span> Confirmar Exclusão
+          <h2 className="modal-title" style={{ color: '#f43f5e' }}>
+            Confirmar Exclusão
           </h2>
           <button className="modal-close-btn" onClick={onClose} aria-label="Fechar modal">
-            ✕
+            X
           </button>
         </div>
 

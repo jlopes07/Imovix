@@ -20,7 +20,7 @@ export const PropertyDetailsModal: React.FC<PropertyDetailsModalProps> = ({
 }) => {
   if (!property) return null;
 
-  const typeInfo = PROPERTY_TYPE_LABELS[property.type] || { label: property.type, icon: '🏠' };
+  const typeInfo = PROPERTY_TYPE_LABELS[property.type] || { label: property.type, icon: 'IMO' };
   const purposeInfo = PROPERTY_PURPOSE_LABELS[property.purpose] || { label: property.purpose, badgeClass: '' };
   const statusInfo = PROPERTY_STATUS_LABELS[property.status] || { label: property.status, badgeClass: '' };
 
@@ -33,7 +33,7 @@ export const PropertyDetailsModal: React.FC<PropertyDetailsModalProps> = ({
             <h2 className="modal-title">{property.title}</h2>
           </div>
           <button className="modal-close-btn" onClick={onClose} aria-label="Fechar modal">
-            ✕
+            X
           </button>
         </div>
 
@@ -47,7 +47,7 @@ export const PropertyDetailsModal: React.FC<PropertyDetailsModalProps> = ({
               {statusInfo.label}
             </span>
             <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#f8fafc' }}>
-              {typeInfo.icon} {typeInfo.label}
+              [{typeInfo.icon}] {typeInfo.label}
             </span>
           </div>
 
@@ -111,27 +111,27 @@ export const PropertyDetailsModal: React.FC<PropertyDetailsModalProps> = ({
               }}
             >
               <div className="glass-card" style={{ padding: '0.75rem' }}>
-                <small style={{ color: '#94a3b8' }}>🛏️ Quartos</small>
+                <small style={{ color: '#94a3b8' }}>Quartos</small>
                 <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{property.dimensions?.bedrooms ?? 0}</div>
               </div>
               <div className="glass-card" style={{ padding: '0.75rem' }}>
-                <small style={{ color: '#94a3b8' }}>✨ Suítes</small>
+                <small style={{ color: '#94a3b8' }}>Suítes</small>
                 <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{property.dimensions?.suites ?? 0}</div>
               </div>
               <div className="glass-card" style={{ padding: '0.75rem' }}>
-                <small style={{ color: '#94a3b8' }}>🚿 Banheiros</small>
+                <small style={{ color: '#94a3b8' }}>Banheiros</small>
                 <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{property.dimensions?.bathrooms ?? 0}</div>
               </div>
               <div className="glass-card" style={{ padding: '0.75rem' }}>
-                <small style={{ color: '#94a3b8' }}>🚗 Vagas Garagem</small>
+                <small style={{ color: '#94a3b8' }}>Vagas Garagem</small>
                 <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{property.dimensions?.parkingSpaces ?? 0}</div>
               </div>
               <div className="glass-card" style={{ padding: '0.75rem' }}>
-                <small style={{ color: '#94a3b8' }}>📐 Área Útil</small>
+                <small style={{ color: '#94a3b8' }}>Área Útil</small>
                 <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{formatArea(property.dimensions?.usableArea)}</div>
               </div>
               <div className="glass-card" style={{ padding: '0.75rem' }}>
-                <small style={{ color: '#94a3b8' }}>📏 Área Total</small>
+                <small style={{ color: '#94a3b8' }}>Área Total</small>
                 <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{formatArea(property.dimensions?.totalArea)}</div>
               </div>
             </div>
@@ -193,7 +193,7 @@ export const PropertyDetailsModal: React.FC<PropertyDetailsModalProps> = ({
               onEdit(property);
             }}
           >
-            ✏️ Editar Imóvel
+            Editar Imóvel
           </button>
         </div>
       </div>

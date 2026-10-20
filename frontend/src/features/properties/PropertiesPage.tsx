@@ -148,7 +148,7 @@ export const PropertiesPage: React.FC = () => {
       <div className="toast-container" aria-live="polite">
         {toasts.map((toast) => (
           <div key={toast.id} className={`toast toast-${toast.type}`}>
-            <span>{toast.type === 'success' ? '✅' : '❌'}</span>
+            <span>{toast.type === 'success' ? '[OK]' : '[ERRO]'}</span>
             <span>{toast.message}</span>
           </div>
         ))}
@@ -164,8 +164,8 @@ export const PropertiesPage: React.FC = () => {
       {/* KPI Cards Header */}
       <div className="kpi-grid">
         <div className="kpi-card">
-          <div className="kpi-icon" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
-            🏢
+          <div className="kpi-icon" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontWeight: 700, fontSize: '0.85rem' }}>
+            IMO
           </div>
           <div className="kpi-info">
             <span className="kpi-label">Total de Imóveis</span>
@@ -174,8 +174,8 @@ export const PropertiesPage: React.FC = () => {
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-icon" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
-            ✨
+          <div className="kpi-icon" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>
+            DISP
           </div>
           <div className="kpi-info">
             <span className="kpi-label">Disponíveis</span>
@@ -184,8 +184,8 @@ export const PropertiesPage: React.FC = () => {
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-icon" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc' }}>
-            🏷️
+          <div className="kpi-icon" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', fontWeight: 700, fontSize: '0.85rem' }}>
+            NEG
           </div>
           <div className="kpi-info">
             <span className="kpi-label">Para Venda / Locação</span>
@@ -196,8 +196,8 @@ export const PropertiesPage: React.FC = () => {
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-icon" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
-            💰
+          <div className="kpi-icon" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', fontWeight: 700, fontSize: '0.85rem' }}>
+            BRL
           </div>
           <div className="kpi-info">
             <span className="kpi-label">Carteira de Venda</span>
@@ -212,12 +212,12 @@ export const PropertiesPage: React.FC = () => {
       <section className="toolbar-section" aria-label="Filtros e ações de imóveis">
         <div className="toolbar-top">
           <div className="search-input-wrapper">
-            <span className="search-icon-placeholder">🔍</span>
             <input
               type="text"
               placeholder="Buscar por código (AP-101), título, bairro ou cidade..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ paddingLeft: '1rem' }}
             />
           </div>
 
@@ -228,15 +228,14 @@ export const PropertiesPage: React.FC = () => {
               disabled={loading}
               title="Recarregar lista"
             >
-              🔄 Atualizar
+              Atualizar
             </button>
             <button
               className="btn btn-primary"
               onClick={() => setIsCreateModalOpen(true)}
               style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
             >
-              <span>➕</span>
-              <span>Novo Imóvel</span>
+              Novo Imóvel
             </button>
           </div>
         </div>
@@ -301,12 +300,13 @@ export const PropertiesPage: React.FC = () => {
       {/* Grid de Imóveis */}
       {loading && properties.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⏳</div>
           <p>Carregando imóveis com isolamento multi-tenant...</p>
         </div>
       ) : filteredProperties.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">🏠</div>
+          <div className="empty-state-icon" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#38bdf8' }}>
+            IMOVEIS
+          </div>
           <h3 className="empty-state-title">Nenhum imóvel encontrado</h3>
           <p className="empty-state-desc">
             {searchTerm || selectedType !== 'ALL' || selectedPurpose !== 'ALL' || selectedStatus !== 'ALL'

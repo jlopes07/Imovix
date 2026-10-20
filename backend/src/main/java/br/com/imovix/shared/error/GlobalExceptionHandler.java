@@ -98,7 +98,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     br.com.imovix.identity.domain.UserNotFoundException.class,
     br.com.imovix.companies.domain.CompanyNotFoundException.class,
     br.com.imovix.companies.domain.MembershipNotFoundException.class,
-    br.com.imovix.properties.domain.PropertyNotFoundException.class
+    br.com.imovix.properties.domain.PropertyNotFoundException.class,
+    br.com.imovix.crm.domain.LeadNotFoundException.class,
+    br.com.imovix.crm.domain.ActivityNotFoundException.class
   })
   public ResponseEntity<ProblemDetail> handleNotFoundExceptions(RuntimeException ex) {
     ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
