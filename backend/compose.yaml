@@ -1,0 +1,76 @@
+# =============================================================================
+# Imovix — dependências de desenvolvimento local
+#
+#   cp .env.example .env        # e defina senhas fortes
+#   docker compose up -d        # sobe apenas o PostgreSQL
+#   docker compose --profile app up -d --build   # sobe PostgreSQL + API em container
+#
+# Segurança:
+#  - Nenhuma senha padrão: variáveis obrigatórias falham se ausentes (":?").
+#  - Portas publicadas somente em 127.0.0.1 (não expostas na rede local).
+#  - A API usa um role sem privilégios de superusuário (ver init script).
+# =============================================================================
+name: imovix
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: imovix-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?defina POSTGRES_DB no .env}
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER:?defina POSTGRES_ADMIN_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?defina POSTGRES_ADMIN_PASSWORD no .env}
+      # Role de aplicação (menor privilégio), criado pelo init script
+      APP_DB_USER: ${DB_USERNAME:?defina DB_USERNAME no .env}
+      APP_DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
+      APP_DB_SCHEMA: ${DB_SCHEMA:-imovix}
+      # scram-sha-256 para conexões TCP e também no init
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    volumes:
+      # PostgreSQL 18+: o volume deve ser montado em /var/lib/postgresql
+      - postgres-data:/var/lib/postgresql
+      - ../infra/docker/postgres/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  backend:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: imovix-backend:local
+    container_name: imovix-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:-imovix}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+    ports:
+      - "127.0.0.1:${SERVER_PORT:-8080}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  postgres-data:
+    name: imovix-postgres-data

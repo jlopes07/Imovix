@@ -1,0 +1,86 @@
+# =============================================================================
+# Imovix backend — configuração comum a todos os ambientes.
+#
+# Regras:
+#  - Nenhum segredo aqui. Credenciais vêm de variáveis de ambiente.
+#  - Padrões seguros por default; perfis (local, staging, prod) só sobrescrevem
+#    o estritamente necessário.
+# =============================================================================
+spring:
+  application:
+    name: imovix-backend
+
+  threads:
+    virtual:
+      enabled: true
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      pool-name: imovix-db-pool
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      connection-timeout: 10000 # 10s em ms
+      max-lifetime: 1800000     # 30m em ms
+
+  jpa:
+    # Evita consultas lazy durante a renderização da resposta (N+1 ocultos)
+    open-in-view: false
+    hibernate:
+      # O esquema é responsabilidade das migrações (Flyway), nunca do Hibernate
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    schemas: ${DB_SCHEMA:imovix}
+    default-schema: ${DB_SCHEMA:imovix}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+
+imovix:
+  security:
+    cors:
+      # Sem origens por padrão: cada ambiente define a sua lista explícita
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+      allow-credentials: false
+      max-age: 1h
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  error:
+    # Nunca expor detalhes internos em respostas de erro
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
+    whitelabel:
+      enabled: false
+
+logging:
+  pattern:
+    level: "%5p [cid:%X{correlationId:-none}]"
+  level:
+    root: INFO
+    org.flywaydb: INFO

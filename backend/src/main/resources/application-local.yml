@@ -1,0 +1,12 @@
+# =============================================================================
+# Perfil "local": desenvolvimento individual com Docker Compose.
+# Ativado automaticamente por "./mvnw spring-boot:run".
+# =============================================================================
+spring:
+  config:
+    # Reaproveita o backend/.env (ignorado pelo Git) como fonte de propriedades
+    import: optional:file:./.env[.properties]
+
+logging:
+  level:
+    br.com.imovix: DEBUG
