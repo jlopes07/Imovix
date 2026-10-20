@@ -66,7 +66,11 @@ public class SecurityConfig {
                     .frameOptions(frame -> frame.deny()))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info")
+                auth.requestMatchers(
+                        "/actuator/health",
+                        "/actuator/health/**",
+                        "/actuator/info",
+                        "/actuator/prometheus")
                     .permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/users")
                     .permitAll()

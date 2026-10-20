@@ -228,4 +228,8 @@ A interface web estará disponível em `http://localhost:5173`, com proxy config
    - Controle estrito de cotas com validação de limite excedido (HTTP 403 RFC 7807).
    - Medidores de consumo no frontend para capacidade de imóveis e usuários da equipe.
    - Fluxo interativo de troca e upgrade de planos com persistência e atualização imediata de limites.
-10. [ ] **Staging, backups/restauração, observabilidade e homologação.**
+10. [x] **Staging, backups/restauração, observabilidade e homologação.**
+   - Módulo de auditoria imutável (audit) e conformidade LGPD (/api/v1/audit/events).
+   - Observabilidade com métricas de produção expostas via Micrometer Prometheus (/actuator/prometheus).
+   - Scripts automatizados de backup e restauração do PostgreSQL (backup-db.sh/ps1 e restore-db.sh/ps1).
+   - Pipeline de CI/CD via GitHub Actions (.github/workflows/ci.yml) validando build Java 25, Spotless, ArchUnit e frontend Vite.

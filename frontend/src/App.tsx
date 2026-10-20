@@ -4,6 +4,7 @@ import { PropertiesPage } from './features/properties/PropertiesPage';
 import { CrmView } from './features/crm/CrmView';
 import { PublicCatalogPage } from './features/listings/PublicCatalogPage';
 import { SubscriptionPage } from './features/subscriptions/SubscriptionPage';
+import { AuditPage } from './features/audit/AuditPage';
 
 interface ModuleCard {
   id: string;
@@ -74,8 +75,8 @@ const MODULES: ModuleCard[] = [
     id: 'audit',
     name: 'Trilha de Auditoria',
     category: 'ops',
-    description: 'Log imutável de eventos sensíveis para conformidade e segurança.',
-    status: 'scaffolded',
+    description: 'Log imutável de eventos sensíveis para conformidade e segurança LGPD.',
+    status: 'ready',
     apiPath: '/api/v1/audit/events',
     icon: 'AUD',
   },
@@ -91,7 +92,7 @@ const MODULES: ModuleCard[] = [
 ];
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'properties' | 'crm' | 'listings' | 'subscriptions' | 'architecture'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'crm' | 'listings' | 'subscriptions' | 'audit' | 'architecture'>('properties');
   const [filter, setFilter] = useState<'all' | 'core' | 'business' | 'ops'>('all');
 
   const filteredModules = MODULES.filter(
@@ -139,6 +140,13 @@ export const App: React.FC = () => {
               onClick={() => setActiveTab('subscriptions')}
             >
               Planos &amp; Assinatura
+            </button>
+            <button
+              className={`btn ${activeTab === 'audit' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+              onClick={() => setActiveTab('audit')}
+            >
+              Auditoria &amp; LGPD
             </button>
             <button
               className={`btn ${activeTab === 'architecture' ? 'btn-primary' : 'btn-secondary'}`}
@@ -191,6 +199,10 @@ export const App: React.FC = () => {
       ) : activeTab === 'subscriptions' ? (
         <main className="container main-content" style={{ paddingTop: '1.5rem' }}>
           <SubscriptionPage />
+        </main>
+      ) : activeTab === 'audit' ? (
+        <main className="container main-content" style={{ paddingTop: '1.5rem' }}>
+          <AuditPage />
         </main>
       ) : (
         <>
