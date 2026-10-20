@@ -3,6 +3,8 @@ package br.com.imovix.properties.application;
 import br.com.imovix.properties.domain.DuplicatePropertyCodeException;
 import br.com.imovix.properties.domain.Property;
 import br.com.imovix.properties.domain.PropertyRepository;
+import br.com.imovix.properties.domain.PropertyType;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,16 +20,16 @@ public class CreatePropertyUseCase {
 
   @Transactional
   public PropertyResponse execute(CreatePropertyCommand command) {
-    String normalizedCode = command.code().trim().toUpperCase();
+    String resolvedCode = resolveCode(command.tenantId(), command.code(), command.type());
 
-    if (propertyRepository.existsByTenantIdAndCode(command.tenantId(), normalizedCode)) {
-      throw new DuplicatePropertyCodeException(normalizedCode);
+    if (propertyRepository.existsByTenantIdAndCode(command.tenantId(), resolvedCode)) {
+      throw new DuplicatePropertyCodeException(resolvedCode);
     }
 
     Property property =
         Property.createNew(
             command.tenantId(),
-            normalizedCode,
+            resolvedCode,
             command.title(),
             command.description(),
             command.type(),
@@ -39,5 +41,28 @@ public class CreatePropertyUseCase {
 
     Property saved = propertyRepository.save(property);
     return PropertyResponse.fromDomain(saved);
+  }
+
+  private String resolveCode(UUID tenantId, String providedCode, PropertyType type) {
+    if (providedCode != null && !providedCode.isBlank()) {
+      return providedCode.trim().toUpperCase();
+    }
+
+    String prefix =
+        switch (type) {
+          case APARTMENT -> "AP";
+          case HOUSE -> "CS";
+          case LAND -> "TR";
+          case COMMERCIAL -> "CM";
+          case RURAL -> "RU";
+        };
+
+    long nextNumber = propertyRepository.countByTenantId(tenantId) + 1;
+    String candidate = String.format("%s-%04d", prefix, nextNumber);
+    while (propertyRepository.existsByTenantIdAndCode(tenantId, candidate)) {
+      nextNumber++;
+      candidate = String.format("%s-%04d", prefix, nextNumber);
+    }
+    return candidate;
   }
 }

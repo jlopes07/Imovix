@@ -85,4 +85,33 @@ class CreatePropertyUseCaseTest {
         .isInstanceOf(DuplicatePropertyCodeException.class)
         .hasMessageContaining("AP-200");
   }
+
+  @Test
+  @DisplayName("Deve gerar código automático sequencial quando o código não for fornecido")
+  void shouldGenerateCodeAutomaticallyWhenCodeNotProvided() {
+    UUID tenantId = UUID.randomUUID();
+
+    CreatePropertyCommand command =
+        new CreatePropertyCommand(
+            tenantId,
+            null,
+            "Casa em Condomínio",
+            null,
+            PropertyType.HOUSE,
+            PropertyPurpose.SALE,
+            null,
+            null,
+            null,
+            null);
+
+    when(propertyRepository.countByTenantId(tenantId)).thenReturn(5L);
+    when(propertyRepository.existsByTenantIdAndCode(tenantId, "CS-0006")).thenReturn(false);
+    when(propertyRepository.save(any(Property.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    PropertyResponse response = createPropertyUseCase.execute(command);
+
+    assertThat(response).isNotNull();
+    assertThat(response.code()).isEqualTo("CS-0006");
+  }
 }

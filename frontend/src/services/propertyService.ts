@@ -25,7 +25,7 @@ export const PropertyService = {
 
   async create(formData: PropertyFormData): Promise<Property> {
     const payload = {
-      code: formData.code.trim(),
+      code: formData.code?.trim() || null,
       title: formData.title.trim(),
       description: formData.description.trim() || null,
       type: formData.type,
@@ -57,7 +57,7 @@ export const PropertyService = {
 
   async update(id: string, formData: PropertyFormData): Promise<Property> {
     const payload = {
-      code: formData.code.trim(),
+      code: formData.code?.trim() || '',
       title: formData.title.trim(),
       description: formData.description.trim() || null,
       type: formData.type,

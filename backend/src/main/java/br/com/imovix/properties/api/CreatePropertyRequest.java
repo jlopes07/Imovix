@@ -15,9 +15,7 @@ import java.util.UUID;
 
 /** Payload de requisição para cadastro de novo imóvel. */
 public record CreatePropertyRequest(
-    @NotBlank(message = "O código interno do imóvel é obrigatório.")
-        @Size(max = 50, message = "O código interno deve ter no máximo 50 caracteres.")
-        String code,
+    @Size(max = 50, message = "O código interno deve ter no máximo 50 caracteres.") String code,
     @NotBlank(message = "O título do anúncio é obrigatório.")
         @Size(min = 3, max = 255, message = "O título deve ter entre 3 e 255 caracteres.")
         String title,

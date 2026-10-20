@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import type {
   Property,
   PropertyFormData,
@@ -11,6 +11,9 @@ import {
   PROPERTY_PURPOSE_LABELS,
   PROPERTY_STATUS_LABELS,
 } from '../../../types/property';
+import { CurrencyInput } from '../../../components/CurrencyInput';
+import { CepService } from '../../../services/cepService';
+import { maskBRL } from '../../../utils/currency';
 
 interface PropertyFormModalProps {
   isOpen: boolean;
@@ -45,6 +48,11 @@ const DEFAULT_FORM: PropertyFormData = {
   state: 'SP',
 };
 
+function formatInitialCurrency(value?: number | null): string {
+  if (value === undefined || value === null) return '';
+  return maskBRL(Math.round(value * 100).toString());
+}
+
 export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
   isOpen,
   onClose,
@@ -60,10 +68,10 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
         type: initialData.type,
         purpose: initialData.purpose,
         status: initialData.status,
-        salePrice: initialData.pricing?.salePrice ? String(initialData.pricing.salePrice) : '',
-        rentalPrice: initialData.pricing?.rentalPrice ? String(initialData.pricing.rentalPrice) : '',
-        condoFee: initialData.pricing?.condoFee ? String(initialData.pricing.condoFee) : '',
-        iptu: initialData.pricing?.iptu ? String(initialData.pricing.iptu) : '',
+        salePrice: formatInitialCurrency(initialData.pricing?.salePrice),
+        rentalPrice: formatInitialCurrency(initialData.pricing?.rentalPrice),
+        condoFee: formatInitialCurrency(initialData.pricing?.condoFee),
+        iptu: formatInitialCurrency(initialData.pricing?.iptu),
         bedrooms: initialData.dimensions?.bedrooms !== undefined ? String(initialData.dimensions.bedrooms) : '',
         bathrooms: initialData.dimensions?.bathrooms !== undefined ? String(initialData.dimensions.bathrooms) : '',
         suites: initialData.dimensions?.suites !== undefined ? String(initialData.dimensions.suites) : '',
@@ -84,6 +92,10 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLookingUpCep, setIsLookingUpCep] = useState(false);
+  const [cepStatusMessage, setCepStatusMessage] = useState<string | null>(null);
+
+  const numberInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
@@ -94,14 +106,66 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleCurrencyChange = (field: 'salePrice' | 'rentalPrice' | 'condoFee' | 'iptu', formattedValue: string) => {
+    setFormData((prev) => ({ ...prev, [field]: formattedValue }));
+  };
+
+  // Busca e preenchimento de endereço automático via ViaCEP
+  const handleCepLookup = async (cepToSearch: string) => {
+    const cleanCep = cepToSearch.replace(/\D/g, '');
+    if (cleanCep.length !== 8) return;
+
+    try {
+      setIsLookingUpCep(true);
+      setCepStatusMessage('Buscando endereço pelo CEP...');
+      const address = await CepService.lookup(cleanCep);
+
+      if (address) {
+        setFormData((prev) => ({
+          ...prev,
+          street: address.street || prev.street,
+          neighborhood: address.neighborhood || prev.neighborhood,
+          city: address.city || prev.city,
+          state: address.state || prev.state,
+          complement: address.complement || prev.complement,
+        }));
+        setCepStatusMessage('Endereço localizado com sucesso!');
+        setTimeout(() => setCepStatusMessage(null), 3500);
+
+        // Foca automaticamente no campo Número após carregar o CEP
+        setTimeout(() => {
+          numberInputRef.current?.focus();
+        }, 100);
+      } else {
+        setCepStatusMessage('CEP não localizado na base. Preencha manualmente.');
+        setTimeout(() => setCepStatusMessage(null), 4000);
+      }
+    } catch {
+      setCepStatusMessage('Erro ao consultar CEP. Preencha manualmente.');
+      setTimeout(() => setCepStatusMessage(null), 4000);
+    } finally {
+      setIsLookingUpCep(false);
+    }
+  };
+
+  const handleZipCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+    let formattedZip = digits;
+    if (digits.length > 5) {
+      formattedZip = `${digits.slice(0, 5)}-${digits.slice(5)}`;
+    }
+    setFormData((prev) => ({ ...prev, zipCode: formattedZip }));
+
+    // Se completou os 8 dígitos do CEP, busca automaticamente
+    if (digits.length === 8) {
+      void handleCepLookup(digits);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!formData.code.trim()) {
-      setErrorMessage('O código interno do imóvel é obrigatório.');
-      return;
-    }
     if (!formData.title.trim()) {
       setErrorMessage('O título do anúncio é obrigatório.');
       return;
@@ -153,22 +217,40 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
 
             {/* Seção 1: Dados Principais */}
             <h3 className="form-section-title">1. Dados Principais</h3>
-            <div className="form-grid-3">
-              <div className="form-group">
-                <label className="form-label">
-                  Código <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="code"
-                  className="form-control"
-                  placeholder="Ex: AP-102"
-                  value={formData.code}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
 
+            {/* Código do imóvel gerado automaticamente pelo sistema (não digitado pelo usuário) */}
+            <div
+              style={{
+                background: 'rgba(56, 189, 248, 0.08)',
+                border: '1px solid rgba(56, 189, 248, 0.2)',
+                borderRadius: '8px',
+                padding: '0.75rem 1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '0.85rem',
+                color: '#cbd5e1',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '1.1rem' }}>🏷️</span>
+                <span>
+                  <strong>Código do Imóvel:</strong>{' '}
+                  {initialData ? (
+                    <span className="card-code-tag">{initialData.code}</span>
+                  ) : (
+                    <span style={{ color: '#38bdf8' }}>
+                      Gerado automaticamente pelo sistema (ex: AP-0001, CS-0002)
+                    </span>
+                  )}
+                </span>
+              </div>
+              {initialData && (
+                <small style={{ color: '#94a3b8' }}>(Identificador interno fixo)</small>
+              )}
+            </div>
+
+            <div className="form-grid-2">
               <div className="form-group">
                 <label className="form-label">
                   Tipo de Imóvel <span className="required">*</span>
@@ -189,7 +271,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
 
               <div className="form-group">
                 <label className="form-label">
-                  Finalidade <span className="required">*</span>
+                  Finalidade Comercial <span className="required">*</span>
                 </label>
                 <select
                   name="purpose"
@@ -206,21 +288,19 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
               </div>
             </div>
 
-            <div className="form-grid-2">
-              <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                <label className="form-label">
-                  Título do Anúncio <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  className="form-control"
-                  placeholder="Ex: Apartamento Alto Padrão com Varanda Gourmet"
-                  value={formData.title}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className="form-group">
+              <label className="form-label">
+                Título do Anúncio <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                name="title"
+                className="form-control"
+                placeholder="Ex: Apartamento Alto Padrão com Varanda Gourmet"
+                value={formData.title}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             {initialData && (
@@ -253,58 +333,46 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
               />
             </div>
 
-            {/* Seção 2: Precificação */}
-            <h3 className="form-section-title">2. Valores & Condomínio (R$)</h3>
+            {/* Seção 2: Precificação em Real Brasileiro (BRL / R$) */}
+            <h3 className="form-section-title">2. Valores & Condomínio (R$ — Real Brasileiro)</h3>
             <div className="form-grid-4">
               <div className="form-group">
-                <label className="form-label">Preço Venda</label>
-                <input
-                  type="number"
-                  step="0.01"
+                <label className="form-label">Preço de Venda</label>
+                <CurrencyInput
                   name="salePrice"
-                  className="form-control"
-                  placeholder="0,00"
                   value={formData.salePrice}
-                  onChange={handleChange}
+                  onChange={(val) => handleCurrencyChange('salePrice', val)}
+                  placeholder="0,00"
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Preço Locação</label>
-                <input
-                  type="number"
-                  step="0.01"
+                <label className="form-label">Preço de Locação</label>
+                <CurrencyInput
                   name="rentalPrice"
-                  className="form-control"
-                  placeholder="0,00"
                   value={formData.rentalPrice}
-                  onChange={handleChange}
+                  onChange={(val) => handleCurrencyChange('rentalPrice', val)}
+                  placeholder="0,00"
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Condomínio</label>
-                <input
-                  type="number"
-                  step="0.01"
+                <label className="form-label">Taxa Condomínio</label>
+                <CurrencyInput
                   name="condoFee"
-                  className="form-control"
-                  placeholder="0,00"
                   value={formData.condoFee}
-                  onChange={handleChange}
+                  onChange={(val) => handleCurrencyChange('condoFee', val)}
+                  placeholder="0,00"
                 />
               </div>
 
               <div className="form-group">
                 <label className="form-label">IPTU Anual</label>
-                <input
-                  type="number"
-                  step="0.01"
+                <CurrencyInput
                   name="iptu"
-                  className="form-control"
-                  placeholder="0,00"
                   value={formData.iptu}
-                  onChange={handleChange}
+                  onChange={(val) => handleCurrencyChange('iptu', val)}
+                  placeholder="0,00"
                 />
               </div>
             </div>
@@ -317,6 +385,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                 <input
                   type="number"
                   name="bedrooms"
+                  min="0"
                   className="form-control"
                   value={formData.bedrooms}
                   onChange={handleChange}
@@ -328,6 +397,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                 <input
                   type="number"
                   name="suites"
+                  min="0"
                   className="form-control"
                   value={formData.suites}
                   onChange={handleChange}
@@ -339,6 +409,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                 <input
                   type="number"
                   name="bathrooms"
+                  min="0"
                   className="form-control"
                   value={formData.bathrooms}
                   onChange={handleChange}
@@ -352,6 +423,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                 <input
                   type="number"
                   name="parkingSpaces"
+                  min="0"
                   className="form-control"
                   value={formData.parkingSpaces}
                   onChange={handleChange}
@@ -363,6 +435,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                 <input
                   type="number"
                   step="0.1"
+                  min="0"
                   name="usableArea"
                   className="form-control"
                   placeholder="Ex: 85.5"
@@ -376,6 +449,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                 <input
                   type="number"
                   step="0.1"
+                  min="0"
                   name="totalArea"
                   className="form-control"
                   placeholder="Ex: 110"
@@ -385,19 +459,56 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
               </div>
             </div>
 
-            {/* Seção 4: Localização */}
-            <h3 className="form-section-title">4. Localização & Endereço</h3>
+            {/* Seção 4: Localização com busca automática de CEP */}
+            <h3 className="form-section-title">
+              4. Localização & Endereço (Busca Automática por CEP)
+            </h3>
+
+            {cepStatusMessage && (
+              <div
+                style={{
+                  background: isLookingUpCep ? 'rgba(56, 189, 248, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                  border: isLookingUpCep ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)',
+                  color: isLookingUpCep ? '#38bdf8' : '#34d399',
+                  padding: '0.5rem 0.85rem',
+                  borderRadius: '6px',
+                  fontSize: '0.8rem',
+                }}
+              >
+                {cepStatusMessage}
+              </div>
+            )}
+
             <div className="form-grid-3">
               <div className="form-group">
-                <label className="form-label">CEP</label>
-                <input
-                  type="text"
-                  name="zipCode"
-                  className="form-control"
-                  placeholder="00000-000"
-                  value={formData.zipCode}
-                  onChange={handleChange}
-                />
+                <label className="form-label">
+                  CEP <small style={{ color: '#38bdf8' }}>(digite para buscar)</small>
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    name="zipCode"
+                    className="form-control"
+                    placeholder="00000-000"
+                    maxLength={9}
+                    value={formData.zipCode}
+                    onChange={handleZipCodeChange}
+                    onBlur={() => handleCepLookup(formData.zipCode)}
+                  />
+                  {isLookingUpCep && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        right: '0.75rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        fontSize: '0.8rem',
+                      }}
+                    >
+                      ⏳
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="form-group" style={{ gridColumn: 'span 2' }}>
@@ -406,7 +517,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                   type="text"
                   name="street"
                   className="form-control"
-                  placeholder="Ex: Av. Paulista"
+                  placeholder="Ex: Av. Atlântica"
                   value={formData.street}
                   onChange={handleChange}
                 />
@@ -415,12 +526,15 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
 
             <div className="form-grid-4">
               <div className="form-group">
-                <label className="form-label">Número</label>
+                <label className="form-label">
+                  Número <span className="required">*</span>
+                </label>
                 <input
+                  ref={numberInputRef}
                   type="text"
                   name="number"
                   className="form-control"
-                  placeholder="1000"
+                  placeholder="1500"
                   value={formData.number}
                   onChange={handleChange}
                 />
@@ -432,7 +546,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                   type="text"
                   name="complement"
                   className="form-control"
-                  placeholder="Apto 42"
+                  placeholder="Apto 101"
                   value={formData.complement}
                   onChange={handleChange}
                 />
@@ -444,7 +558,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                   type="text"
                   name="neighborhood"
                   className="form-control"
-                  placeholder="Bela Vista"
+                  placeholder="Gonzaga"
                   value={formData.neighborhood}
                   onChange={handleChange}
                 />
@@ -457,7 +571,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                     type="text"
                     name="city"
                     className="form-control"
-                    placeholder="São Paulo"
+                    placeholder="Santos"
                     value={formData.city}
                     onChange={handleChange}
                     style={{ flex: 2 }}

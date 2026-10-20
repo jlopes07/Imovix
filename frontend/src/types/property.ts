@@ -57,7 +57,7 @@ export interface PagedPropertiesResponse {
 }
 
 export interface PropertyFormData {
-  code: string;
+  code?: string;
   title: string;
   description: string;
   type: PropertyType;
